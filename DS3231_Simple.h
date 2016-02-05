@@ -72,16 +72,16 @@ class DS3231_Simple
 
     
     
-  public: 
+  protected: 
   
     static const uint8_t      RTC_ADDRESS  = 0x68; 
       // Datasheet, Page 16, Figure 3.  Note that this is 7 bits, the last (LSB) bit of an I2C address indicates Read from Slave (1) or Write to Slave (1)   
       
     static uint8_t bcd2bin(uint8_t binaryRepresentation);
     static uint8_t bin2bcd(uint8_t bcdRepresentation);
-    static uint8_t i2c_seek(const uint8_t Address);
-    static uint8_t i2c_write_byte(const uint8_t Address, const uint8_t Byte);    
-    static uint8_t i2c_read_byte(const uint8_t Address,  uint8_t &Byte);    
+    static uint8_t rtc_i2c_seek(const uint8_t Address);
+    static uint8_t rtc_i2c_write_byte(const uint8_t Address, const uint8_t Byte);    
+    static uint8_t rtc_i2c_read_byte(const uint8_t Address,  uint8_t &Byte);    
     static void    print_zero_padded(Stream &Printer, uint8_t x);    
           
   public:
@@ -260,30 +260,50 @@ class DS3231_Simple
      *  
      */
     void     printDateTo_DMY(Stream &Printer, const DateTime &Timestamp, const char separator = '/');
+    
+    /** Print the date portion of the current DateTime structure in DD/MM/YYYY format.
+     *  
+     */
     void     printDateTo_DMY(Stream &Printer) { printDateTo_DMY(Printer, read()); }
     
     /** Print the date portion of the given DateTime structure in MM/DD/YYYY format.
      *  
      */
     void     printDateTo_MDY(Stream &Printer, const DateTime &Timestamp, const char separator = '/');
+    
+    /** Print the date portion of the current DateTime structure in MM/DD/YYYY format.
+     *  
+     */
     void     printDateTo_MDY(Stream &Printer) { printDateTo_MDY(Printer, read()); }
     
     /** Print the date portion of the given DateTime structure in YYYY-MM-DD format.
      *  
      */
-    void     printDateTo_YMD(Stream &Printer, const DateTime &Timestamp, const char separator = '-');        
+    void     printDateTo_YMD(Stream &Printer, const DateTime &Timestamp, const char separator = '-');       
+    
+    /** Print the date portion of the current DateTime structure in YYYY-MM-DD format.
+     *  
+     */
     void     printDateTo_YMD(Stream &Printer) { printDateTo_YMD(Printer, read()); }
     
     /** Print the time portion of the given DateTime structure in HH:MM:SS format (24 Hour Clock)
      *  
      */
     void     printTimeTo_HMS(Stream &Printer, const DateTime &Timestamp, const char hoursToMinutesSeparator = ':', const char minutesToSecondsSeparator = ':');
+    
+    /** Print the time portion of the current DateTime structure in HH:MM:SS format (24 Hour Clock)
+     *  
+     */
     void     printTimeTo_HMS(Stream &Printer) { printTimeTo_HMS(Printer, read()); }
 
     /** Print the time portion of the given DateTime structure in HH:MM format (24 Hour Clock)
      *  
      */
     void     printTimeTo_HM (Stream &Printer, const DateTime &Timestamp, const char hoursToMinutesSeparator = ':');
+    
+    /** Print the time portion of the current DateTime structure in HH:MM format (24 Hour Clock)
+     *  
+     */
     void     printTimeTo_HM(Stream &Printer) { printTimeTo_HM(Printer, read()); }
 
     /** Print the time portion of the given DateTime structure in HH:MM:SS [AM/PM] format (12 Hour Clock)
@@ -296,6 +316,10 @@ class DS3231_Simple
      *  
      */    
     void     print12HourTimeTo_HM (Stream &Printer, const DateTime &Timestamp, const char hoursToMinutesSeparator = ':');
+    
+    /** Print the time portion of the current DateTime structure in HH:MM:SS [AM/PM] format (12 Hour Clock)
+     *  
+     */    
     void     print12HourTimeTo_HM(Stream &Printer) { print12HourTimeTo_HM(Printer, read()); }
     
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -404,6 +428,8 @@ class DS3231_Simple
      *  Note that you must not modify the eepromWriteAddress between
      *  a writeBytePagewizeStart() and a writeBytePagewizeEnd()
      *  or it's all going to get out of kilter.
+     * 
+     *  @return Success (boolean) 1/0, presently this method always reports success.
      *  
      */
     uint8_t writeBytePagewizeStart();
@@ -412,25 +438,36 @@ class DS3231_Simple
      *  
      *  Note that this function increments the eepromWriteAddress.
      *  
-     *  See writeBytePagewizeStart()
+     *  @param data Byte to write.
+     *  @see DS3231::writeBytePagewizeStart()
+     *  @return Success (boolean) 1/0, presently this method always reports success.
      */
      
     uint8_t writeBytePagewize(const uint8_t data);
 
     /** End a pagewize write operation.
-     *  
-     *  See writeBytePagewizeStart()
+     *      
+     *  @see DS3231::writeBytePagewizeStart()
+     *  @return Success (boolean) 1/0, this method will return 0 if Wire.endTransmission reports an error.
      */
+    
     uint8_t writeBytePagewizeEnd();
+      
+    /** Read a byte from the EEPROM
+     * 
+     *  @param Address The address of the EEPROM to read from.
+     *  @return The data byte read.  
+     *  @note   There is limited error checking, if you provide an invalid address, or the EEPROM is not responding etc behaviour is undefined (return 0, return 1, might or might not block...).
+     */
+    uint8_t  readEEPROMByte(const uint16_t Address);
+
     
   public:
-  
-    uint8_t  formatEEPROM();
-    uint8_t  readEEPROMByte(uint16_t);
-
+    /** Erase the EEPROM ready for storing log entries. */
     
-
-    /** Write a log entry to the EEPROM with an attached data of arbitrary datatype (7 bytes max).
+    uint8_t  formatEEPROM();
+  
+    /** Write a log entry to the EEPROM, having current timestamp, with an attached data of arbitrary datatype (7 bytes max).
      *  
      *  This method allows you to record a "log entry" which you can later retrieve.
      *  
@@ -455,9 +492,8 @@ class DS3231_Simple
      *     Clock.writeLog(MyDataStructure);
      *     
      *  
-     *  @param Timestamp for the log.
-     *  @param Pointer to bytes of data to associate with the log.
-     *  @param size of the array of byte data (maximum 7 bytes)
+     *  @param data  The data to store, any arbitrary scalar or structur datatype consisting not more than 7 bytes.
+     *  @note  To store a string or other pointer contents, you probably want to use `DS3231::writeLog(const DateTime, const uint8_t *data, uint8_t size)`
      *  
      */
      
@@ -465,31 +501,58 @@ class DS3231_Simple
       uint8_t  writeLog( const datatype &data  )   { 
          return writeLog(read(), (uint8_t *) &data, (uint8_t)sizeof(datatype));         
       }
-        
+   
+    /** Write a log entry to the EEPROM, having supplied timestamp, with an attached data of arbitrary datatype (7 bytes max).
+     * 
+     * @see DS3231::writeLog(const datatype)
+     * @param timestamp The timestamp to associate with the log entry.
+     * @param data  The data to store, any arbitrary datatype consisting not more than 7 bytes.
+     */
+    
     template <typename datatype>
       uint8_t  writeLog( const DateTime &timestamp,  const datatype &data  )   {      
          return writeLog(timestamp, (uint8_t *) &data, (uint8_t)sizeof(datatype));         
       }
 
-   uint8_t  writeLog( const DateTime &timestamp,  const uint8_t *data, uint8_t size = 1 );
+    /** Write a log entry to the EEPROM, having supplied timestamp, with an attached data.
+     *            
+     * @param timestamp The timestamp to associate with the log entry.
+     * @param data  Pointer to the data to store
+     * @param size  Length of data to store - max length is 7 bytes, this is not checked for compliance!
+     */
+    
+    uint8_t  writeLog( const DateTime &timestamp,  const uint8_t *data, uint8_t size = 1 );
     
 
     /** Read the oldest log entry and clear it from EEPROM.
      *  
-     *  @param Variable to put the timestamp of the log into.
-     *  @param Optional pointer to buffer to put data associated with the log.
-     *  @param Optional size of the data buffer.
+     *  @param timestamp Variable to put the timestamp of the log into.
+     *  @param data      Variable to put the data.
      *  
-     *    Note that if the data in the log entry is larger than the buffer, it will be truncated.
-     *    Maximum 7 bytes.
+     *  @note No check is made as to if the type of "data" and the type of
+     *    the data which is read is the same, there is nothing to stop you
+     *    doing "writeLog( myFloat );" and subsequently "readLog( myInt );"
+     *    but if you do so, results are going to be not what you expect!
      *  
      */
-    uint8_t  readLog( DateTime &timestamp,         uint8_t *data,       uint8_t size = 1 );
     
     template <typename datatype>
       uint8_t  readLog( DateTime &timestamp,  datatype &data  )   {   
          return readLog(timestamp, (uint8_t *) &data, (uint8_t)sizeof(datatype));         
       }
+      
+    /** Read the oldest log entry and clear it from EEPROM.
+     *  
+     *  @param timestamp Variable to put the timestamp of the log into.
+     *  @param data      Pointer to buffer to put data associated with the log.
+     *  @param size      Size of the data buffer.  Maximum 7 bytes.
+     *  
+     *  @note If the data in the log entry is larger than the buffer, it will be truncated.
+     *  
+     */
+    
+    uint8_t  readLog( DateTime &timestamp,         uint8_t *data,       uint8_t size = 1 );
+    
 
     /** Compare two DateTime objects to determine which one is older.
      *  
@@ -497,7 +560,9 @@ class DS3231_Simple
      *  If A is equal to B   return  0
      *  If A is newer than B return  1
      *  
+     * @return -1, 0 or 1
      */
+    
     int8_t   compareTimestamps(const DateTime &A, const DateTime &B);
     
 };

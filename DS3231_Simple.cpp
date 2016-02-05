@@ -3,11 +3,10 @@
 void DS3231_Simple::begin()
 {  
   Wire.begin();
- 
-  
+   
   // Setup the clock to make sure that it is running, that the oscillator and 
   // square wave are disabled, and that alarm interrupts are disabled
-  i2c_write_byte(0xE, 0b00000000);
+  rtc_i2c_write_byte(0xE, 0b00000000);
   disableAlarms();
 }
 
@@ -16,6 +15,81 @@ void DS3231_Simple::begin()
 //  so be sure to mask your input for bcd2bin
 uint8_t DS3231_Simple::bcd2bin (uint8_t val) { return ((val >> 4) * 10) + (val & 0x0F); }
 uint8_t DS3231_Simple::bin2bcd (uint8_t val) { return (val / 10) << 4 | (val % 10);     }
+
+void DS3231_Simple::print_zero_padded(Stream &Printer, uint8_t x)
+{
+  if(x < 10) Printer.print('0');
+  Printer.print(x);
+}
+
+uint8_t DS3231_Simple::rtc_i2c_seek(const uint8_t Address)
+{
+  Wire.beginTransmission(RTC_ADDRESS);
+  Wire.write(Address);
+  return Wire.endTransmission();
+}
+
+uint8_t DS3231_Simple::rtc_i2c_write_byte(const uint8_t Address, const uint8_t Data)
+{
+  Wire.beginTransmission(RTC_ADDRESS);
+  Wire.write(Address);
+  Wire.write(Data);
+  return Wire.endTransmission();
+}
+
+uint8_t DS3231_Simple::rtc_i2c_read_byte(const uint8_t Address, uint8_t &Data)
+{
+  rtc_i2c_seek(Address);
+  #if 0
+  // hardware/arduino/avr/libraries/Wire/utilities/twi.cpp::twi_readFrom()
+  // returns 0 ONLy if the buffer is too small for the number of bytes we
+  // want.  Since we are reading 1 byte, that's never going to happen
+  // so there is no point in this comparison.  
+  //
+  // Short Version: Wire.requestFrom(x, n) can only ever return n
+  //
+  // Leaving this here in case twi.cpp changes in the future to return 
+  // 0 on other cases.
+  
+  if(Wire.requestFrom(RTC_ADDRESS,(uint8_t) 1) == 1)
+  {
+    Data = Wire.read();
+    return 1;
+  }
+  return 0;
+  #else
+  Wire.requestFrom(RTC_ADDRESS,(uint8_t) 1);
+  Data = Wire.read();
+  return 1;
+  #endif  
+}
+
+// Compare the datetime of two objects to put i ascending date order 
+//  -1 A is befre B, 1 B is before A, 0 identical
+int8_t DS3231_Simple::compareTimestamps(const DateTime &A, const DateTime &B)
+{
+  if(A.Year < B.Year)       return -1;
+  if(A.Year > B.Year)       return  1;
+
+  if(A.Month < B.Month)     return -1;
+  if(A.Month > B.Month)     return 1;
+
+  if(A.Day < B.Day)         return -1;
+  if(A.Day > B.Day)         return 1;
+
+  if(A.Hour < B.Hour)       return -1;
+  if(A.Hour > B.Hour)       return 1;
+
+  if(A.Minute < B.Minute)   return -1;
+  if(A.Minute > B.Minute)   return 1;
+
+  
+  if(A.Second < B.Second)   return -1;
+  if(A.Second > B.Second)   return 1;
+
+  return 0;
+}
+
 uint8_t DS3231_Simple::formatEEPROM()
 {
   eepromWriteAddress = 0;
@@ -31,7 +105,7 @@ uint8_t DS3231_Simple::formatEEPROM()
   return 1;
 }
 
-uint8_t DS3231_Simple::readEEPROMByte(uint16_t address)
+uint8_t DS3231_Simple::readEEPROMByte(const uint16_t address)
 {
   uint8_t b = 0;
   Wire.beginTransmission(EEPROM_ADDRESS); // DUMMY WRITE
@@ -123,32 +197,6 @@ uint16_t DS3231_Simple::findEEPROMReadAddress()
   return eepromReadAddress;
 }
 
-// Compare the datetime of two objects to put i ascending date order 
-//  -1 A is befre B, 1 B is before A, 0 identical
-int8_t DS3231_Simple::compareTimestamps(const DateTime &A, const DateTime &B)
-{
-  if(A.Year < B.Year)       return -1;
-  if(A.Year > B.Year)       return  1;
-
-  if(A.Month < B.Month)     return -1;
-  if(A.Month > B.Month)     return 1;
-
-  if(A.Day < B.Day)         return -1;
-  if(A.Day > B.Day)         return 1;
-
-  if(A.Hour < B.Hour)       return -1;
-  if(A.Hour > B.Hour)       return 1;
-
-  if(A.Minute < B.Minute)   return -1;
-  if(A.Minute > B.Minute)   return 1;
-
-  
-  if(A.Second < B.Second)   return -1;
-  if(A.Second > B.Second)   return 1;
-
-  return 0;
-}
-
 // Clear some space int he EEPROM to record BytesRequired bytes, nulls
 //  any overlappig blocks.
 uint8_t DS3231_Simple::makeEEPROMSpace(uint16_t Address, int8_t BytesRequired)
@@ -225,7 +273,6 @@ uint8_t DS3231_Simple::writeBytePagewizeEnd()
   while(!Wire.requestFrom(EEPROM_ADDRESS,(uint8_t) 1));  
   return 1;
 }
-
 
 uint8_t  DS3231_Simple::writeLog( const DateTime &timestamp,   const uint8_t *data, uint8_t size )
 {
@@ -347,52 +394,50 @@ uint8_t DS3231_Simple::readLog( DateTime &timestamp,   uint8_t *data, uint8_t si
   return 1;
 }
 
-void DS3231_Simple::print_zero_padded(Stream &Printer, uint8_t x)
-{
-  if(x < 10) Printer.print('0');
-  Printer.print(x);
-}
 
-uint8_t DS3231_Simple::i2c_seek(const uint8_t Address)
+DS3231_Simple::DateTime DS3231_Simple::read()
 {
-  Wire.beginTransmission(RTC_ADDRESS);
-  Wire.write(Address);
-  return Wire.endTransmission();
-}
+  DateTime currentDate;
+  uint8_t  x; 
 
-uint8_t DS3231_Simple::i2c_write_byte(const uint8_t Address, const uint8_t Data)
-{
-  Wire.beginTransmission(RTC_ADDRESS);
-  Wire.write(Address);
-  Wire.write(Data);
-  return Wire.endTransmission();
-}
+  // Set the register address by doing a write of just the address
+  rtc_i2c_seek(0x00);
 
-uint8_t DS3231_Simple::i2c_read_byte(const uint8_t Address, uint8_t &Data)
-{
-  i2c_seek(Address);
-  #if 0
-  // hardware/arduino/avr/libraries/Wire/utilities/twi.cpp::twi_readFrom()
-  // returns 0 ONLy if the buffer is too small for the number of bytes we
-  // want.  Since we are reading 1 byte, that's never going to happen
-  // so there is no point in this comparison.  
-  //
-  // Short Version: Wire.requestFrom(x, n) can only ever return n
-  //
-  // Leaving this here in case twi.cpp changes in the future to return 
-  // 0 on other cases.
-  
-  if(Wire.requestFrom(RTC_ADDRESS,(uint8_t) 1) == 1)
+  // Read in the 7 bytes which store the
+  //  Seconds, Minutes, Hours, Day-Of-Week, Day, Month, Year
+  if(Wire.requestFrom(RTC_ADDRESS,(uint8_t) 7) == 7)
   {
-    Data = Wire.read();
-    return 1;
-  }
-  return 0;
-  #else
-  Wire.requestFrom(RTC_ADDRESS,(uint8_t) 1);
-  Data = Wire.read();
-  return 1;
-  #endif  
+    currentDate.Second = bcd2bin(Wire.read());
+    currentDate.Minute = bcd2bin(Wire.read());
+    
+    // 6th Bit of hour indicates 12/24 Hour mode, we will always use 24 hour mode, because we is smart
+    x = Wire.read();    
+    if(x & _BV(6))
+    {
+      currentDate.Hour = bcd2bin(x & 0B11111) + (x & _BV(5) ? 0 : 12);
+    }
+    else
+    {
+      currentDate.Hour = bcd2bin(x & 0B111111);
+    }
+    
+    currentDate.Dow = bcd2bin(Wire.read());
+    currentDate.Day = bcd2bin(Wire.read());
+    
+    x = Wire.read();
+    // bit 7 of month indicates if the year is going to be 100+Year or just Year
+    if(x&_BV(7))
+    {
+      currentDate.Year = 100;
+    }
+    else
+    {
+      currentDate.Year = 0;
+    }
+    currentDate.Month = bcd2bin(x & 0B01111111);
+    currentDate.Year += bcd2bin(Wire.read());
+  }  
+  return currentDate;
 }
 
 uint8_t DS3231_Simple::write(const DateTime &currentDate)
@@ -414,17 +459,7 @@ uint8_t DS3231_Simple::setAlarm(const DateTime &AlarmDate, uint8_t AlarmMode)
   uint8_t controlByte;
   
   // Read the control byte, we will need to modify the alarm enable bits  
-  #if 0
-  i2c_seek(0xE);
-  
-  if(Wire.requestFrom(RTC_ADDRESS,(uint8_t) 1) == 0)
-  {
-    return 0;
-  }
-  controlByte = Wire.read();        
-  #else
-  if(!i2c_read_byte(0xE,controlByte)) return 0;
-  #endif
+  if(!rtc_i2c_read_byte(0xE,controlByte)) return 0;
   
   //if(AlarmMode >> 5 == 3) // Some custom modes we will rewrite the data and recurse with a standard mode
   if((AlarmMode & 0B00000011) == 0B00000011) // Some custom modes we will rewrite the data and recurse with a standard mode
@@ -482,7 +517,7 @@ uint8_t DS3231_Simple::setAlarm(const DateTime &AlarmDate, uint8_t AlarmMode)
   if(Wire.endTransmission()) return 0;
   
   // Write the control byte
-  if(i2c_write_byte(0xE, controlByte)) return 0;
+  if(rtc_i2c_write_byte(0xE, controlByte)) return 0;
   
   return AlarmMode >> 5;
 }
@@ -492,52 +527,33 @@ uint8_t DS3231_Simple::setAlarm(uint8_t AlarmMode)
   return setAlarm(read(), AlarmMode);
 }
 
-
 uint8_t DS3231_Simple::checkAlarms(uint8_t PauseClock)
 {
   uint8_t StatusByte = 0;
   
   if(PauseClock)
   {
-    #if 0
-    i2c_seek(0xE);
-    if(Wire.requestFrom(RTC_ADDRESS,(uint8_t) 1) == 1)
+    if(rtc_i2c_read_byte(0xE,StatusByte))
     {
-      i2c_write_byte(0xE, Wire.read() | _BV(7)); // Disable the oscillator   
+      rtc_i2c_write_byte(0xE, StatusByte | _BV(7));
     }
-    #else
-    if(i2c_read_byte(0xE,StatusByte))
-    {
-      i2c_write_byte(0xE, StatusByte | _BV(7));
-    }
-    #endif
   }
   
-  #if 0
-  i2c_seek(0xF);
-  if(Wire.requestFrom(RTC_ADDRESS,(uint8_t) 1) == 1)
-  {
-    StatusByte = Wire.read();
-  }
-  #else
-  i2c_read_byte(0xF,StatusByte);
-  #endif
+  rtc_i2c_read_byte(0xF,StatusByte);
 
   if(StatusByte & 0x3)
   {
     // Clear the alarm
-    i2c_write_byte(0xF,StatusByte & ~0x3);    
+    rtc_i2c_write_byte(0xF,StatusByte & ~0x3);    
   }
 
   if(PauseClock)
   {
-    if(i2c_read_byte(0xE, PauseClock))
+    if(rtc_i2c_read_byte(0xE, PauseClock))
     {
-      i2c_write_byte(0xE, PauseClock & ~(_BV(7)));
+      rtc_i2c_write_byte(0xE, PauseClock & ~(_BV(7)));
     }    
   }
-  
-  
   
   return StatusByte & 0x3;
 }
@@ -563,54 +579,9 @@ uint8_t DS3231_Simple::disableAlarms()
   return 1;  
 }
 
-DS3231_Simple::DateTime DS3231_Simple::read()
-{
-  DateTime currentDate;
-  uint8_t  x; 
-
-  // Set the register address by doing a write of just the address
-  i2c_seek(0x00);
-
-  // Read in the 7 bytes which store the
-  //  Seconds, Minutes, Hours, Day-Of-Week, Day, Month, Year
-  if(Wire.requestFrom(RTC_ADDRESS,(uint8_t) 7) == 7)
-  {
-    currentDate.Second = bcd2bin(Wire.read());
-    currentDate.Minute = bcd2bin(Wire.read());
-    
-    // 6th Bit of hour indicates 12/24 Hour mode, we will always use 24 hour mode, because we is smart
-    x = Wire.read();    
-    if(x & _BV(6))
-    {
-      currentDate.Hour = bcd2bin(x & 0B11111) + (x & _BV(5) ? 0 : 12);
-    }
-    else
-    {
-      currentDate.Hour = bcd2bin(x & 0B111111);
-    }
-    
-    currentDate.Dow = bcd2bin(Wire.read());
-    currentDate.Day = bcd2bin(Wire.read());
-    
-    x = Wire.read();
-    // bit 7 of month indicates if the year is going to be 100+Year or just Year
-    if(x&_BV(7))
-    {
-      currentDate.Year = 100;
-    }
-    else
-    {
-      currentDate.Year = 0;
-    }
-    currentDate.Month = bcd2bin(x & 0B01111111);
-    currentDate.Year += bcd2bin(Wire.read());
-  }  
-  return currentDate;
-}
-
 uint8_t DS3231_Simple::getTemperature()
 {
-  i2c_seek(0x11);
+  rtc_i2c_seek(0x11);
 
   uint8_t t = 0;
   uint8_t x = 0;
@@ -633,7 +604,7 @@ uint8_t DS3231_Simple::getTemperature()
 
 float DS3231_Simple::getTemperatureFloat()
 {
-  i2c_seek(0x11);
+  rtc_i2c_seek(0x11);
 
   float t = 0;
   if(Wire.requestFrom(RTC_ADDRESS,(uint8_t) 2) == 2)
@@ -644,6 +615,10 @@ float DS3231_Simple::getTemperatureFloat()
   
   return t;
 }
+
+
+
+
 
 void DS3231_Simple::printTo(Stream &Printer)
 {
@@ -656,8 +631,6 @@ void DS3231_Simple::printTo(Stream &Printer, const DateTime &timestamp)
   Printer.print('T');
   printTimeTo_HMS(Printer, timestamp);
 }
-
-
 
 void DS3231_Simple::printDateTo_DMY(Stream &Printer, const DateTime &Timestamp, const char separator)
 {  
