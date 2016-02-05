@@ -310,6 +310,10 @@ class DS3231_Simple
      *  
      */
     void     print12HourTimeTo_HMS(Stream &Printer, const DateTime &Timestamp, const char hoursToMinutesSeparator = ':', const char minutesToSecondsSeparator = ':');
+    
+    /** Print the time portion of the current DateTime structure in HH:MM:SS [AM/PM] format (12 Hour Clock)
+     *  
+     */
     void     print12HourTimeTo_HMS(Stream &Printer) { print12HourTimeTo_HMS(Printer, read()); }
 
     /** Print the time portion of the given DateTime structure in HH:MM:SS [AM/PM] format (12 Hour Clock)
@@ -504,7 +508,7 @@ class DS3231_Simple
    
     /** Write a log entry to the EEPROM, having supplied timestamp, with an attached data of arbitrary datatype (7 bytes max).
      * 
-     * @see DS3231::writeLog(const datatype)
+     * @see DS3231::writeLog(const datatype &   data)
      * @param timestamp The timestamp to associate with the log entry.
      * @param data  The data to store, any arbitrary datatype consisting not more than 7 bytes.
      */
