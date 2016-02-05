@@ -33,7 +33,7 @@
   <td style="padding-left: 0.5em;">
    <div id="projectname">DS3231 Real-Time-Clock, Temperature Sensor, and I2C (AT24C32) EEPROM Data Logger
    </div>
-   <div id="projectbrief">A simple library to control a JQ6500 MP3 Player Module from an Arduino.</div>
+   <div id="projectbrief">A simple library to control a DS3231 and AT24C32 Module from an Arduino.</div>
   </td>
  </tr>
  </tbody>
@@ -207,8 +207,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a082b18ee9f004f4c102de9c44b0ba308"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_d_s3231___simple.html#a082b18ee9f004f4c102de9c44b0ba308">print12HourTimeTo_HMS</a> (Stream &amp;Printer, const <a class="el" href="struct_d_s3231___simple_1_1_date_time.html">DateTime</a> &amp;Timestamp, const char hoursToMinutesSeparator= ':', const char minutesToSecondsSeparator= ':')</td></tr>
 <tr class="memdesc:a082b18ee9f004f4c102de9c44b0ba308"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print the time portion of the given <a class="el" href="struct_d_s3231___simple_1_1_date_time.html">DateTime</a> structure in HH:MM:SS [AM/PM] format (12 Hour Clock)  <a href="#a082b18ee9f004f4c102de9c44b0ba308">More...</a><br /></td></tr>
 <tr class="separator:a082b18ee9f004f4c102de9c44b0ba308"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2b161e865965ebc0cf4d089676cc350a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2b161e865965ebc0cf4d089676cc350a"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>print12HourTimeTo_HMS</b> (Stream &amp;Printer)</td></tr>
+<tr class="memitem:a2b161e865965ebc0cf4d089676cc350a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_d_s3231___simple.html#a2b161e865965ebc0cf4d089676cc350a">print12HourTimeTo_HMS</a> (Stream &amp;Printer)</td></tr>
+<tr class="memdesc:a2b161e865965ebc0cf4d089676cc350a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print the time portion of the current <a class="el" href="struct_d_s3231___simple_1_1_date_time.html">DateTime</a> structure in HH:MM:SS [AM/PM] format (12 Hour Clock)  <a href="#a2b161e865965ebc0cf4d089676cc350a">More...</a><br /></td></tr>
 <tr class="separator:a2b161e865965ebc0cf4d089676cc350a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adb2f8cabc230afe673b3cf13c195888d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_d_s3231___simple.html#adb2f8cabc230afe673b3cf13c195888d">print12HourTimeTo_HM</a> (Stream &amp;Printer, const <a class="el" href="struct_d_s3231___simple_1_1_date_time.html">DateTime</a> &amp;Timestamp, const char hoursToMinutesSeparator= ':')</td></tr>
 <tr class="memdesc:adb2f8cabc230afe673b3cf13c195888d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print the time portion of the given <a class="el" href="struct_d_s3231___simple_1_1_date_time.html">DateTime</a> structure in HH:MM:SS [AM/PM] format (12 Hour Clock)  <a href="#adb2f8cabc230afe673b3cf13c195888d">More...</a><br /></td></tr>
@@ -683,6 +683,32 @@ static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>EEPRO
 </div><div class="memdoc">
 
 <p>Print the time portion of the given <a class="el" href="struct_d_s3231___simple_1_1_date_time.html">DateTime</a> structure in HH:MM:SS [AM/PM] format (12 Hour Clock) </p>
+
+</div>
+</div>
+<a class="anchor" id="a2b161e865965ebc0cf4d089676cc350a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DS3231_Simple::print12HourTimeTo_HMS </td>
+          <td>(</td>
+          <td class="paramtype">Stream &amp;&#160;</td>
+          <td class="paramname"><em>Printer</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Print the time portion of the current <a class="el" href="struct_d_s3231___simple_1_1_date_time.html">DateTime</a> structure in HH:MM:SS [AM/PM] format (12 Hour Clock) </p>
 
 </div>
 </div>
@@ -1364,7 +1390,7 @@ template&lt;typename datatype &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="class_d_s3231___simple.html">DS3231_Simple</a></li>
-    <li class="footer">Generated on Fri Feb 5 2016 22:28:29 for DS3231 Real-Time-Clock, Temperature Sensor, and I2C (AT24C32) EEPROM Data Logger by
+    <li class="footer">Generated on Sat Feb 6 2016 12:26:00 for DS3231 Real-Time-Clock, Temperature Sensor, and I2C (AT24C32) EEPROM Data Logger by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>
