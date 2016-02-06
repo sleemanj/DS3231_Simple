@@ -40,6 +40,10 @@ if ! doxygen
 then
   echo "Doxygen Failed"
 else
+  # we need to strip out the absolute link to the class reference
+  cat html/index.html | sed -r "s/(href=\")http.*\/[^\/]+\/docs\/html\//\1/" >html/index.html.2
+  mv html/index.html.2 html/index.html
+
   echo "Documentation Build Complete"
   echo "Please check the documentation and if you are satisfied with it hit Y to commit it and update the README.md in the root."
   echo -n "Commit and update README.md (y/N <enter>): "
