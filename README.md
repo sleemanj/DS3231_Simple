@@ -40,6 +40,6 @@ Choose the other examples starting with those in "z1_TimeAndDate" for the basis 
 
 ## Full Class Reference
 
-I recommend to just look at the examples which show you how to use all the features, but if you want the nitty-gritty then here is the [full class reference](https://cdn.rawgit.com/sleemanj/DS3231_Simple/4215dc8/docs/html/class_d_s3231___simple.html)
+I recommend to just look at the examples which show you how to use all the features, but if you want the nitty-gritty then here is the [full class reference](https://cdn.rawgit.com/sleemanj/DS3231_Simple/31d0dac/docs/html/class_d_s3231___simple.html)
 
 Thanks to the super kind folks of [RawGit](https://rawgit.com/) and [MaxCDN](http://www.maxcdn.com/)

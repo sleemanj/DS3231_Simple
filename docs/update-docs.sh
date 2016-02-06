@@ -55,7 +55,7 @@ else
     if ( git add . && git commit )
     then
       HEAD="$(git log --format=format:"%h" | head -1)"
-      cat ../README.md | sed -r "s/(\(http.*\/)[^\/]+(\/docs\/html\/index.html)/\1$HEAD\2/" >../README.md.2
+      cat ../README.md | sed -r "s/(\(http.*\/)[^\/]+(\/docs\/html\/[^.]+\.html)/\1$HEAD\2/" >../README.md.2
       mv ../README.md.2 ../README.md
       
       echo "Updated documentation link to use $HEAD"      
