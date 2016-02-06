@@ -9,6 +9,8 @@ It includes the ability to read and set the time/date, set up to 2 alarms (one w
 
 Additionally the RTC is often found paired with an I2C EEPROM (usually AT24C32) which can be used for convenient data-logging purposes.
 
+![ZS-042 RTC and EEPROM Module](https://cdn.rawgit.com/sleemanj/DS3231_Simple/master/docs/zs-042.jpg)
+
 ## Why this library?
 
 This library was written because other libraries I had seen seemed less than satisfactorily simple.
