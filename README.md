@@ -38,4 +38,8 @@ Upload the example to your Arduino and open the Serial Terminal at 9600 Baud.  T
 
 Choose the other examples starting with those in "z1_TimeAndDate" for the basis and progressing through to z4_DataLogging for the advanced topics (z1 / z2... is just because the ArduinoIDE doesn't have a good way to sort the Examples).
 
+## Full Class Reference
 
+I recommend to just look at the examples which show you how to use all the features, but if you want the nitty-gritty then here is the [full class reference](https://cdn.rawgit.com/sleemanj/DS3231_Simple/4215dc8/docs/html/index.html)
+
+Thanks to the super kind folks of [RawGit](https://rawgit.com/) and [MaxCDN](http://www.maxcdn.com/)

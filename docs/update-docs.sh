@@ -55,7 +55,7 @@ else
       mv ../README.md.2 ../README.md
       
       echo "Updated documentation link to use $HEAD"      
-      echo "You should stage and commit README.md as desired."
+      echo "You should stage and commit README.md as desired, remember to push!"
     fi
   else
     echo "Cancelled"
