@@ -83,7 +83,6 @@ int8_t DS3231_Simple::compareTimestamps(const DateTime &A, const DateTime &B)
   if(A.Minute < B.Minute)   return -1;
   if(A.Minute > B.Minute)   return 1;
 
-  
   if(A.Second < B.Second)   return -1;
   if(A.Second > B.Second)   return 1;
 
@@ -270,7 +269,7 @@ uint8_t DS3231_Simple::writeBytePagewizeEnd()
   }
   
   // Poll for write to complete
-  while(!Wire.requestFrom(EEPROM_ADDRESS,(uint8_t) 1));  
+  while(!Wire.requestFrom(EEPROM_ADDRESS,(uint8_t) 1));
   return 1;
 }
 
