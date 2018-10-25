@@ -36,6 +36,7 @@
 #define DS3231Easy_h
 #include <Wire.h>
 
+#define SECONDS_FROM_1970_TO_2000 946684800
 
 class DS3231_Simple
 {
@@ -46,6 +47,7 @@ class DS3231_Simple
  // Functionally equivalent in all other respects.
     
  // #define USE_BIT_FIELDS
+ 
     #ifdef USE_BIT_FIELDS
     struct DateTime 
     {      
@@ -70,6 +72,8 @@ class DS3231_Simple
     };
     #endif
 
+	DS3231_Simple();
+	static const uint8_t* dim;
     
     
   protected: 
@@ -129,6 +133,11 @@ class DS3231_Simple
      
     void begin();
 
+	/** Get the UnixTimeStamp by giving a DateTime object
+	 *
+	 */
+	long getUnixTime(DateTime t);
+	
     /** Read the current date and time, returning a structure containing that information.
      *  
      */
