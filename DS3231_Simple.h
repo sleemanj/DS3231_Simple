@@ -216,11 +216,14 @@ class DS3231_Simple
      *  If you pause the clock, then this won't happen, but your time keeping
      *  will not be so accurate because every time you check the alarm you will 
      *  "get behind" a small amount.
+     * 
+     *  Can be "read only" by disabling the clearing of the alarms. By default
+     *  will clear alarms.
      *  
      *  @return 0 For no alarm, 1 for Alarm 1, 2 for Alarm 2, and 3 for Both Alarms     
      */
      
-    uint8_t  checkAlarms(uint8_t PauseClock = false);
+    uint8_t  checkAlarms(uint8_t PauseClock = false, uint8_t ClearAlarms = true);
 
     /** Get the temperature accurate to within 1 degree (C)
      *  

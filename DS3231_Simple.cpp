@@ -526,7 +526,7 @@ uint8_t DS3231_Simple::setAlarm(uint8_t AlarmMode)
   return setAlarm(read(), AlarmMode);
 }
 
-uint8_t DS3231_Simple::checkAlarms(uint8_t PauseClock)
+uint8_t DS3231_Simple::checkAlarms(uint8_t PauseClock, uint8_t ClearAlarms)
 {
   uint8_t StatusByte = 0;
   
@@ -540,10 +540,13 @@ uint8_t DS3231_Simple::checkAlarms(uint8_t PauseClock)
   
   rtc_i2c_read_byte(0xF,StatusByte);
 
+  if(ClearAlarms)
+  {
   if(StatusByte & 0x3)
   {
     // Clear the alarm
     rtc_i2c_write_byte(0xF,StatusByte & ~0x3);    
+  }
   }
 
   if(PauseClock)
