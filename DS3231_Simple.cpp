@@ -1,5 +1,13 @@
 #include <DS3231_Simple.h>
 
+static const uint8_t a_dim[] PROGMEM = { 31,28,31,30,31,30,31,31,30,31,30,31 };
+const uint8_t* DS3231_Simple::dim = a_dim;
+
+DS3231_Simple::DS3231_Simple(void) {
+
+	
+}
+
 void DS3231_Simple::begin()
 {  
   Wire.begin();
@@ -9,6 +17,21 @@ void DS3231_Simple::begin()
   rtc_i2c_write_byte(0xE, 0b00000000);
   disableAlarms();
 }
+
+long DS3231_Simple::getUnixTime(DateTime t) {
+	uint16_t dc;
+	dc = t.Day;
+	
+	for (uint8_t i = 0; i < (t.Month - 1); i++)
+		dc += dim[i];
+		
+	if ((t.Month > 2) && (((t.Year) % 4) == 0))
+		++dc;
+	
+	return ((((((dc * 24L) + t.Hour) * 60) + t.Minute) * 60) + t.Second) + SECONDS_FROM_1970_TO_2000;
+
+}
+
 
 // Page 11 of Datasheet shows that the LSB 4 bits of the data types are always the last BCD digit
 //  the upper 3 bits are sometimes the upper digit, sometimes a mix of that and some other data
