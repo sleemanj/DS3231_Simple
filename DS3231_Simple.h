@@ -36,6 +36,7 @@
 #define DS3231Easy_h
 #include <Wire.h>
 
+#define _BV(place) (1 << place)
 
 class DS3231_Simple
 {
