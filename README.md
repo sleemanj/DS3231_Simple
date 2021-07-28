@@ -30,7 +30,7 @@ These modules are I2C devices, so that's easy as pie.
 
 ## Download, Install and Example
 
-* Download: http://sparks.gogo.co.nz/DS3231_Simple.zip
+* Download: https://sparks.gogo.co.nz/DS3231_Simple.zip
 * Open the Arduino IDE (this library was tested in 1.6.7, but older versions should be fine too)
 * Select the menu item Sketch > Import Library > Add Library
 * Choose to install the DS3231_Simple.zip file you downloaded
