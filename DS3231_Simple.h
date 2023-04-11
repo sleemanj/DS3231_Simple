@@ -29,12 +29,11 @@
  * @license MIT License
  */
 
-// Please note, the Arduino IDE is a bit retarded, if the below define has an
-// underscore other than _h, it goes mental.  Wish it wouldn't  mess
-// wif ma files!
+// Please note, only one underscore is permitted in the guard define (Arduino IDE weirdness)
 #ifndef DS3231Easy_h
 #define DS3231Easy_h
 #include <Wire.h>
+#include <Stream.h>
 
 #ifndef _BV
 #define _BV(b) (1UL << (b))
